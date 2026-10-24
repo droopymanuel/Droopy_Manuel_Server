@@ -21,7 +21,7 @@ import { ValidationError, optionalString, requireInt, requireString, requireStri
 // ----------------------------------------------------- Configuración suelta
 
 /** Claves permitidas en `site_settings`. Evita escribir claves arbitrarias. */
-const SETTING_KEYS = ['about_blurb', 'contact_email', 'stats'] as const;
+const SETTING_KEYS = ['about_blurb', 'contact_email', 'stats', 'announcement'] as const;
 export type SettingKey = (typeof SETTING_KEYS)[number];
 
 export async function setSetting(key: string, value: unknown): Promise<void> {
@@ -51,6 +51,19 @@ export async function setSetting(key: string, value: unknown): Promise<void> {
 		for (const field of ['rescued', 'adopted', 'sterilized', 'inCare']) {
 			requireInt(stats?.[field], `stats.${field}`);
 		}
+	}
+
+	if (key === 'announcement') {
+		const announcement = value as Record<string, unknown>;
+		if (typeof announcement?.enabled !== 'boolean') {
+			throw new ValidationError('El campo "announcement.enabled" debe ser true o false.');
+		}
+		const count = requireInt(announcement.dogsCount, 'announcement.dogsCount', 1);
+		if (count > 12) {
+			throw new ValidationError('El campo "announcement.dogsCount" no puede pasar de 12.');
+		}
+		optionalString(announcement.title, 'announcement.title', 120);
+		optionalString(announcement.message, 'announcement.message', 300);
 	}
 
 	await db

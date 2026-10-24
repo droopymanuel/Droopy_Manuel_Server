@@ -107,6 +107,7 @@ export function createApp(): Express {
 				'POST /api/orders',
 				'GET  /api/orders/:orderNumber',
 				'GET  /api/site/content',
+				'GET  /api/site/announcement',
 				'GET  /api/site/contact',
 				'GET  /api/site/stats',
 				'GET  /api/site/donation-tiers',

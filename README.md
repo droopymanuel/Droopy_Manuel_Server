@@ -210,6 +210,7 @@ curl -X POST http://localhost:3100/api/orders \
 | Método | Ruta | Devuelve |
 | --- | --- | --- |
 | GET | `/api/site/content` | Texto "sobre nosotros" + estadísticas |
+| GET | `/api/site/announcement` | Anuncio de inicio: activado, cantidad, título, mensaje y los últimos perritos en adopción |
 | GET | `/api/site/contact` | WhatsApp, correo y redes (fuente única del número) |
 | GET | `/api/site/stats` | Solo las estadísticas |
 | GET | `/api/site/donation-tiers` | Niveles de donación |
@@ -257,7 +258,7 @@ curl -X POST http://localhost:3100/api/orders \
 | POST | `/api/admin/news` | editor | Crea una noticia |
 | PATCH | `/api/admin/news/:slug` | editor | Edita una noticia |
 | DELETE | `/api/admin/news/:slug` | **admin** | Borra una noticia |
-| PUT | `/api/admin/site/settings/:key` | editor | Texto, correo o estadísticas |
+| PUT | `/api/admin/site/settings/:key` | editor | Texto, correo, estadísticas o anuncio de inicio |
 | PATCH | `/api/admin/site/contact/:key` | editor | Edita un canal (p. ej. `whatsapp`) |
 | POST/PATCH | `/api/admin/site/donation-tiers…` | editor | Niveles de donación |
 | POST/PATCH | `/api/admin/site/testimonials…` | editor | Testimonios |

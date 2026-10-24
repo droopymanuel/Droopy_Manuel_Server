@@ -9,9 +9,11 @@ import {
 	testimonials
 } from '../db/schema/index.js';
 import type {
+	AnnouncementSettings,
 	BankAccount,
 	DonationTarget,
 	DonationTier,
+	SiteAnnouncement,
 	SiteContact,
 	SiteContent,
 	SiteStats,
@@ -24,7 +26,7 @@ import {
 	toSiteContent,
 	toTestimonial
 } from './mappers.js';
-import { getAlivePack } from './dogs.js';
+import { getAlivePack, getLatestAdoptionDogs } from './dogs.js';
 
 /**
  * Acceso al contenido del sitio: estadísticas, contacto, donaciones.
@@ -35,6 +37,14 @@ import { getAlivePack } from './dogs.js';
  */
 
 const DEFAULT_STATS: SiteStats = { rescued: 0, adopted: 0, sterilized: 0, inCare: 0 };
+
+/** Anuncio desactivado hasta que el panel lo configure. */
+const DEFAULT_ANNOUNCEMENT: AnnouncementSettings = {
+	enabled: false,
+	dogsCount: 4,
+	title: 'Buscando hogar',
+	message: 'Estos perritos están esperando una familia.'
+};
 
 async function getSetting<T>(key: string): Promise<T | undefined> {
 	const [row] = await db
@@ -56,6 +66,38 @@ export async function getStats(): Promise<SiteStats> {
 export async function getSiteContent(): Promise<SiteContent> {
 	const [aboutBlurb, stats] = await Promise.all([getAboutBlurb(), getStats()]);
 	return toSiteContent(aboutBlurb, stats);
+}
+
+/**
+ * Configuración del anuncio de inicio.
+ *
+ * Se mezcla con los valores por defecto para que una fila vieja o parcial no
+ * rompa la portada.
+ */
+export async function getAnnouncementSettings(): Promise<AnnouncementSettings> {
+	const stored = await getSetting<Partial<AnnouncementSettings>>('announcement');
+	const count = stored?.dogsCount;
+
+	return {
+		enabled: stored?.enabled ?? DEFAULT_ANNOUNCEMENT.enabled,
+		// Acotado por si una fila vieja o editada a mano trae un valor raro.
+		dogsCount:
+			typeof count === 'number' && Number.isInteger(count) && count >= 1 && count <= 12
+				? count
+				: DEFAULT_ANNOUNCEMENT.dogsCount,
+		title: stored?.title?.trim() ? stored.title : DEFAULT_ANNOUNCEMENT.title,
+		message: stored?.message ?? DEFAULT_ANNOUNCEMENT.message
+	};
+}
+
+/**
+ * El anuncio de la portada: su configuración + los últimos perritos en
+ * adopción. Si está desactivado no se consultan los perritos.
+ */
+export async function getSiteAnnouncement(): Promise<SiteAnnouncement> {
+	const settings = await getAnnouncementSettings();
+	const dogs = settings.enabled ? await getLatestAdoptionDogs(settings.dogsCount) : [];
+	return { ...settings, dogs };
 }
 
 export async function getContactChannels() {

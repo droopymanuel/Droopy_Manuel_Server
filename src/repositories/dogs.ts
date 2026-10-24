@@ -1,4 +1,4 @@
-import { asc, eq, inArray, ne } from 'drizzle-orm';
+import { asc, desc, eq, inArray, ne } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { dogs } from '../db/schema/index.js';
 import type { Dog, DogStatus, PackView, Slug } from '../types.js';
@@ -50,6 +50,21 @@ export async function getFeaturedDogs(): Promise<Dog[]> {
 
 export async function getDogsByStatus(status: DogStatus): Promise<Dog[]> {
 	const rows = await db.select().from(dogs).where(eq(dogs.status, status)).orderBy(...DOG_ORDER);
+	return rows.map(toDog);
+}
+
+/**
+ * Los últimos perritos en adopción, por fecha de llegada (más reciente
+ * primero). Es la fuente del anuncio de la portada: «los últimos X en
+ * adopción». El límite lo fija el panel.
+ */
+export async function getLatestAdoptionDogs(limit: number): Promise<Dog[]> {
+	const rows = await db
+		.select()
+		.from(dogs)
+		.where(eq(dogs.status, 'en-adopcion'))
+		.orderBy(desc(dogs.arrival), desc(dogs.id))
+		.limit(limit);
 	return rows.map(toDog);
 }
 

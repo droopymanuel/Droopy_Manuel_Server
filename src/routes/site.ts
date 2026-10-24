@@ -3,6 +3,7 @@ import {
 	getBankAccounts,
 	getDonationTargets,
 	getDonationTiers,
+	getSiteAnnouncement,
 	getSiteContact,
 	getSiteContent,
 	getStats,
@@ -17,6 +18,14 @@ router.get(
 	'/content',
 	asyncHandler(async (_req: Request, res: Response) => {
 		res.json(await getSiteContent());
+	})
+);
+
+/** GET /api/site/announcement — pop-up de la portada con perritos en adopción. */
+router.get(
+	'/announcement',
+	asyncHandler(async (_req: Request, res: Response) => {
+		res.json(await getSiteAnnouncement());
 	})
 );
 

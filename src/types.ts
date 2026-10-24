@@ -415,6 +415,30 @@ export interface SiteContent {
 }
 
 /**
+ * Configuración del anuncio de inicio (pop-up de la portada).
+ *
+ * Vive en `site_settings` bajo la clave `announcement`, así que se edita desde
+ * el panel sin migración. `dogsCount` es cuántos perritos en adopción muestra.
+ */
+export interface AnnouncementSettings {
+	enabled: boolean;
+	dogsCount: number;
+	title: string;
+	message: string;
+}
+
+/**
+ * El anuncio listo para la portada: su configuración más los perritos.
+ *
+ * `dogs` viene vacío cuando el anuncio está desactivado: el frontend no
+ * necesita pedirlos ni filtrar nada.
+ */
+export interface SiteAnnouncement extends AnnouncementSettings {
+	/** Los últimos perritos en adopción, con la llegada más reciente primero. */
+	dogs: Dog[];
+}
+
+/**
  * Datos de contacto y redes de la fundación.
  *
  * El número de WhatsApp vive aquí y en ningún otro sitio: el frontend lo pide
