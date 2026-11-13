@@ -84,6 +84,7 @@ export function toDogHealth(row: DogHealthRow): DogHealth {
 		nextBath: row.nextBath,
 		dewormingDate: row.dewormingDate,
 		dewormingNext: row.dewormingNext,
+		dewormingProduct: row.dewormingProduct,
 		fleaTickDate: row.fleaTickDate,
 		fleaTickNext: row.fleaTickNext,
 		fleaTickProduct: row.fleaTickProduct,

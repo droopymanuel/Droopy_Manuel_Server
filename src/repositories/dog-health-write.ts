@@ -26,6 +26,7 @@ export interface DogHealthInput {
 	nextBath?: string | null;
 	dewormingDate?: string | null;
 	dewormingNext?: string | null;
+	dewormingProduct?: string | null;
 	fleaTickDate?: string | null;
 	fleaTickNext?: string | null;
 	fleaTickProduct?: string | null;
@@ -84,6 +85,9 @@ export async function upsertDogHealth(
 	}
 	if (input.dewormingNext !== undefined) {
 		values.dewormingNext = requireNullableISODateAny(input.dewormingNext, 'dewormingNext');
+	}
+	if (input.dewormingProduct !== undefined) {
+		values.dewormingProduct = nullableText(input.dewormingProduct, 'dewormingProduct', 120);
 	}
 	if (input.fleaTickDate !== undefined) {
 		values.fleaTickDate = requireNullableISODateAny(input.fleaTickDate, 'fleaTickDate');
