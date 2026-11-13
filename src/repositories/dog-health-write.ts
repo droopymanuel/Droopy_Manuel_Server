@@ -20,10 +20,15 @@ import {
  * un perrito existente.
  */
 
-/** Campos del bloque de salud (baños + veterinario anual). */
+/** Campos del bloque de salud (baños, tratamientos + veterinario anual). */
 export interface DogHealthInput {
 	lastBath?: string | null;
 	nextBath?: string | null;
+	dewormingDate?: string | null;
+	dewormingNext?: string | null;
+	fleaTickDate?: string | null;
+	fleaTickNext?: string | null;
+	fleaTickProduct?: string | null;
 	vetVisitDone?: boolean;
 	vetVisitDate?: string | null;
 }
@@ -73,6 +78,21 @@ export async function upsertDogHealth(
 	}
 	if (input.nextBath !== undefined) {
 		values.nextBath = requireNullableISODateAny(input.nextBath, 'nextBath');
+	}
+	if (input.dewormingDate !== undefined) {
+		values.dewormingDate = requireNullableISODateAny(input.dewormingDate, 'dewormingDate');
+	}
+	if (input.dewormingNext !== undefined) {
+		values.dewormingNext = requireNullableISODateAny(input.dewormingNext, 'dewormingNext');
+	}
+	if (input.fleaTickDate !== undefined) {
+		values.fleaTickDate = requireNullableISODateAny(input.fleaTickDate, 'fleaTickDate');
+	}
+	if (input.fleaTickNext !== undefined) {
+		values.fleaTickNext = requireNullableISODateAny(input.fleaTickNext, 'fleaTickNext');
+	}
+	if (input.fleaTickProduct !== undefined) {
+		values.fleaTickProduct = nullableText(input.fleaTickProduct, 'fleaTickProduct', 120);
 	}
 	if (input.vetVisitDone !== undefined) {
 		values.vetVisitDone = requireBooleanish(input.vetVisitDone, 'vetVisitDone');

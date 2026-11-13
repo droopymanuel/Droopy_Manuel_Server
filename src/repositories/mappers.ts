@@ -82,6 +82,11 @@ export function toDogHealth(row: DogHealthRow): DogHealth {
 		dogSlug: row.dogSlug,
 		lastBath: row.lastBath,
 		nextBath: row.nextBath,
+		dewormingDate: row.dewormingDate,
+		dewormingNext: row.dewormingNext,
+		fleaTickDate: row.fleaTickDate,
+		fleaTickNext: row.fleaTickNext,
+		fleaTickProduct: row.fleaTickProduct,
 		vetVisitDone: row.vetVisitDone,
 		vetVisitDate: row.vetVisitDate
 	};
