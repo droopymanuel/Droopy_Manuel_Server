@@ -2,7 +2,7 @@ import { boolean, index, integer, pgTable, text, timestamp, varchar } from 'driz
 import { dogs } from './dogs.js';
 
 /**
- * Salud de un perrito: baños y visita anual.
+ * Salud de un perrito: baños, tratamientos y visita anual.
  *
  * Es 1:1 con `dogs` (la PK es el slug). No existe fila separada «vacía»: si el
  * perrito no tiene datos, la fila puede faltar y la web simplemente no muestra
@@ -16,6 +16,16 @@ export const dogHealth = pgTable('dog_health', {
 	lastBath: varchar('last_bath', { length: 10 }),
 	/** Próximo baño integral (YYYY-MM-DD). Null = sin dato. */
 	nextBath: varchar('next_bath', { length: 10 }),
+	/** Desparasitante: fecha de aplicación (YYYY-MM-DD). Null = sin dato. */
+	dewormingDate: varchar('deworming_date', { length: 10 }),
+	/** Desparasitante: próximo refuerzo (YYYY-MM-DD). Null = sin dato. */
+	dewormingNext: varchar('deworming_next', { length: 10 }),
+	/** Antipulgas y garrapatas: fecha de aplicación (YYYY-MM-DD). Null = sin dato. */
+	fleaTickDate: varchar('flea_tick_date', { length: 10 }),
+	/** Antipulgas y garrapatas: próximo refuerzo (YYYY-MM-DD). Null = sin dato. */
+	fleaTickNext: varchar('flea_tick_next', { length: 10 }),
+	/** Antipulgas y garrapatas: nombre del producto. Null = sin dato. */
+	fleaTickProduct: varchar('flea_tick_product', { length: 120 }),
 	/** true = ya se hizo la visita anual del veterinario. */
 	vetVisitDone: boolean('vet_visit_done').notNull().default(false),
 	/** Fecha de la visita anual (hecha o agendada). Null = sin dato. */
