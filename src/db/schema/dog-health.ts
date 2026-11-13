@@ -20,6 +20,8 @@ export const dogHealth = pgTable('dog_health', {
 	dewormingDate: varchar('deworming_date', { length: 10 }),
 	/** Desparasitante: próximo refuerzo (YYYY-MM-DD). Null = sin dato. */
 	dewormingNext: varchar('deworming_next', { length: 10 }),
+	/** Desparasitante: nombre del producto. Null = sin dato. */
+	dewormingProduct: varchar('deworming_product', { length: 120 }),
 	/** Antipulgas y garrapatas: fecha de aplicación (YYYY-MM-DD). Null = sin dato. */
 	fleaTickDate: varchar('flea_tick_date', { length: 10 }),
 	/** Antipulgas y garrapatas: próximo refuerzo (YYYY-MM-DD). Null = sin dato. */
