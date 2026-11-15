@@ -79,6 +79,12 @@ await check(
 	(b) => b.items.length === 6 && b.hasMore === true
 );
 await check('GET /api/news/categories (7)', '/api/news/categories', (b) => b.length === 7);
+await check('GET /api/news/sections', '/api/news/sections', (b) => Array.isArray(b) && b.length > 0);
+await check(
+	'GET /api/news/luna-encontro-hogar (con secciones)',
+	'/api/news/luna-encontro-hogar',
+	(b) => b.title === 'Luna encontró hogar' && Array.isArray(b.sections) && b.sections.length > 0
+);
 await check('GET /api/site/content', '/api/site/content', (b) => b.stats.rescued === 248);
 await check('GET /api/site/donation-tiers (4)', '/api/site/donation-tiers', (b) => b.length === 4);
 await check('GET /api/site/testimonials (4)', '/api/site/testimonials', (b) => b.length === 4);

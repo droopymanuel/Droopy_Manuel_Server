@@ -1,8 +1,9 @@
 import { and, asc, count, desc, eq, ilike, inArray, or, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/index.js';
-import { news, newsRelatedDogs } from '../db/schema/index.js';
+import { news, newsRelatedDogs, newsSections } from '../db/schema/index.js';
 import type { NewsCategory, NewsFilter, NewsItem, NewsPage } from '../types.js';
 import { toNewsItem } from './mappers.js';
+import { getNewsSections } from './news-sections.js';
 
 /**
  * Acceso a las noticias.
@@ -42,11 +43,21 @@ function filterCondition(filter: NewsFilter = {}): SQL | undefined {
 	const q = filter.q?.trim();
 	if (q) {
 		const like = `%${q}%`;
+		// Las secciones son el cuerpo real: la búsqueda también las recorre.
+		const sectionsMatch = sql`EXISTS (
+			SELECT 1 FROM ${newsSections}
+			WHERE ${newsSections.newsSlug} = ${news.slug}
+				AND (
+					${newsSections.title} ILIKE ${like}
+					OR array_to_string(${newsSections.body}, ' ') ILIKE ${like}
+				)
+		)`;
 		const match = or(
 			ilike(news.title, like),
 			ilike(news.excerpt, like),
 			sql`array_to_string(${news.tags}, ' ') ILIKE ${like}`,
-			sql`array_to_string(${news.body}, ' ') ILIKE ${like}`
+			sql`array_to_string(${news.body}, ' ') ILIKE ${like}`,
+			sectionsMatch
 		);
 		if (match) conditions.push(match);
 	}
@@ -89,8 +100,9 @@ export async function getNewsItem(slug: string): Promise<NewsItem | undefined> {
 	const [row] = await db.select().from(news).where(eq(news.slug, slug)).limit(1);
 	if (!row) return undefined;
 
-	const related = await relatedByNews([slug]);
-	return toNewsItem(row, related.get(slug) ?? []);
+	// El detalle sí incluye las secciones del cuerpo; el feed no.
+	const [related, sections] = await Promise.all([relatedByNews([slug]), getNewsSections(slug)]);
+	return toNewsItem(row, related.get(slug) ?? [], sections);
 }
 
 export async function getNewsByCategory(category: NewsCategory): Promise<NewsItem[]> {

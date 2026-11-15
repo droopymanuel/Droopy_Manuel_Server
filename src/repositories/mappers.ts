@@ -16,6 +16,7 @@ import type {
 	DonationTarget,
 	DonationTier,
 	NewsItem,
+	NewsSection,
 	ProjectSection,
 	SiteContact,
 	SiteContent,
@@ -37,6 +38,7 @@ import type {
 	DonationTargetRow,
 	DonationTierRow,
 	NewsRow,
+	NewsSectionRow,
 	ProjectSectionRow,
 	ShopCategoryRow,
 	ShopItemRow,
@@ -173,7 +175,23 @@ export function toDogNews(row: DogNewsRow): DogNews {
 	return item;
 }
 
-export function toNewsItem(row: NewsRow, relatedDogSlugs: string[]): NewsItem {
+/** Una fila de `news_sections` tal como la consume el frontend. */
+export function toNewsSection(row: NewsSectionRow): NewsSection {
+	return {
+		id: row.id,
+		newsSlug: row.newsSlug,
+		position: row.position,
+		kind: row.kind,
+		title: row.title,
+		body: row.body
+	};
+}
+
+export function toNewsItem(
+	row: NewsRow,
+	relatedDogSlugs: string[],
+	sections?: NewsSection[]
+): NewsItem {
 	const item: NewsItem = {
 		slug: row.slug,
 		title: row.title,
@@ -186,6 +204,8 @@ export function toNewsItem(row: NewsRow, relatedDogSlugs: string[]): NewsItem {
 		emoji: row.emoji,
 		relatedDogSlugs
 	};
+	// Solo el detalle incluye secciones; el feed las omite.
+	if (sections !== undefined) item.sections = sections;
 	if (row.featured) item.featured = true;
 	return item;
 }

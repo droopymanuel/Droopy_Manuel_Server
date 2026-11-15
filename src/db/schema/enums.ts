@@ -3,6 +3,7 @@ import {
 	DOG_NEWS_KINDS,
 	DOG_STATUSES,
 	NEWS_CATEGORY_SLUGS,
+	NEWS_SECTION_KINDS,
 	PROJECT_SECTION_KINDS
 } from '../../types.js';
 
@@ -43,6 +44,9 @@ export const paymentStatusEnum = pgEnum('payment_status', [
 ]);
 
 export const newsCategoryEnum = pgEnum('news_category', NEWS_CATEGORY_SLUGS);
+
+/** Clase visual de una sección del cuerpo de una noticia. */
+export const newsSectionKindEnum = pgEnum('news_section_kind', NEWS_SECTION_KINDS);
 
 /** Tipo de comunicado en el perfil de un perrito. */
 export const dogNewsKindEnum = pgEnum('dog_news_kind', DOG_NEWS_KINDS);

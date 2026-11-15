@@ -44,6 +44,7 @@ import {
 	dogs,
 	news,
 	newsRelatedDogs,
+	newsSections,
 	shopCategories,
 	shopItems,
 	shopVariants,
@@ -58,6 +59,7 @@ async function reset(): Promise<void> {
 	await db.delete(dogAccessories);
 	await db.delete(dogVaccines);
 	await db.delete(dogHealth);
+	await db.delete(newsSections);
 	await db.delete(newsRelatedDogs);
 	await db.delete(news);
 	await db.delete(donationTargets);
@@ -171,6 +173,20 @@ async function seed(): Promise<void> {
 	);
 	console.log(`Insertando ${related.length} relaciones noticia-perrito…`);
 	if (related.length > 0) await db.insert(newsRelatedDogs).values(related);
+
+	// El cuerpo antiguo de cada noticia se siembra como una sección `chapter`.
+	// Así el seed reproduce el backfill de la migración.
+	const sections = newsSeed
+		.filter((item) => item.body.length > 0)
+		.map((item) => ({
+			newsSlug: item.slug,
+			position: 1,
+			kind: 'chapter' as const,
+			title: null,
+			body: item.body
+		}));
+	console.log(`Insertando ${sections.length} secciones de noticia…`);
+	if (sections.length > 0) await db.insert(newsSections).values(sections);
 
 	// Comunicados por perrito: se descartan los de slugs que no existan.
 	const validDogNews = dogNewsSeed
@@ -302,6 +318,7 @@ try {
 		UNION ALL SELECT 'shop_variants', count(*) FROM shop_variants
 		UNION ALL SELECT 'news', count(*) FROM news
 		UNION ALL SELECT 'news_related_dogs', count(*) FROM news_related_dogs
+		UNION ALL SELECT 'news_sections', count(*) FROM news_sections
 		UNION ALL SELECT 'dog_news', count(*) FROM dog_news
 		UNION ALL SELECT 'dog_health', count(*) FROM dog_health
 		UNION ALL SELECT 'dog_vaccines', count(*) FROM dog_vaccines

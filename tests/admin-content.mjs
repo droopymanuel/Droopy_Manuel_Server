@@ -7,7 +7,7 @@ import { createApp } from '../dist/app.js';
 import { closeDb, db } from '../dist/db/index.js';
 import { createUser } from '../dist/auth/users.js';
 import { eq } from 'drizzle-orm';
-import { adminUsers, news, siteSettings } from '../dist/db/schema/index.js';
+import { adminUsers, news, newsSections, siteSettings } from '../dist/db/schema/index.js';
 import { getSiteContact } from '../dist/repositories/site.js';
 
 const port = 3994;
@@ -122,8 +122,9 @@ try {
 	const badDate = await admin.request('PATCH', `/api/admin/news/${newsSlug}`, { date: '1/3/2026' });
 	check('fecha inválida → 400', badDate.status === 400, `status=${badDate.status}`);
 
+	// Las secciones son el cuerpo real: `body` puede quedar vacío.
 	const emptyBody = await admin.request('PATCH', `/api/admin/news/${newsSlug}`, { body: [] });
-	check('cuerpo vacío → 400', emptyBody.status === 400, `status=${emptyBody.status}`);
+	check('cuerpo vacío se permite', emptyBody.status === 200, `status=${emptyBody.status}`);
 
 	const dupe = await admin.request('POST', '/api/admin/news', {
 		title: 'Luna encontró hogar',
@@ -140,6 +141,66 @@ try {
 		excerpt: 'Editada por el editor.'
 	});
 	check('el editor puede editar noticias', editorEdit.status === 200, `status=${editorEdit.status}`);
+
+	console.log('\n── Secciones de noticia ──');
+
+	const section = await editor.request('POST', `/api/admin/news/${newsSlug}/sections`, {
+		kind: 'chapter',
+		title: 'Primera sección',
+		body: ['Un párrafo.']
+	});
+	check('POST sección → 201', section.status === 201, `status=${section.status}`);
+	const sectionId = section.body?.id;
+
+	const badSection = await editor.request('POST', `/api/admin/news/${newsSlug}/sections`, {
+		kind: 'chapter',
+		body: []
+	});
+	check('sección sin párrafos → 400', badSection.status === 400, `status=${badSection.status}`);
+
+	const moved = await editor.request(
+		'PATCH',
+		`/api/admin/news/${newsSlug}/sections/${sectionId}`,
+		{ position: 2 }
+	);
+	check('PATCH mueve la sección', moved.body?.position === 2, `position=${moved.body?.position}`);
+
+	const [stored] = await db
+		.select()
+		.from(newsSections)
+		.where(eq(newsSections.id, sectionId))
+		.limit(1);
+	check('la sección quedó en la base', stored?.title === 'Primera sección');
+
+	const detail = await editor.request('GET', `/api/news/${newsSlug}`);
+	check(
+		'el detalle incluye las secciones',
+		Array.isArray(detail.body?.sections) && detail.body.sections.length === 1,
+		`len=${detail.body?.sections?.length}`
+	);
+
+	const allSections = await editor.request('GET', '/api/news/sections');
+	check('GET /api/news/sections devuelve lista', Array.isArray(allSections.body));
+
+	const editorDeleteSection = await editor.request(
+		'DELETE',
+		`/api/admin/news/${newsSlug}/sections/${sectionId}`
+	);
+	check(
+		'el editor NO puede borrar secciones → 403',
+		editorDeleteSection.status === 403,
+		`status=${editorDeleteSection.status}`
+	);
+
+	const adminDeleteSection = await admin.request(
+		'DELETE',
+		`/api/admin/news/${newsSlug}/sections/${sectionId}`
+	);
+	check(
+		'el admin borra la sección → 204',
+		adminDeleteSection.status === 204,
+		`status=${adminDeleteSection.status}`
+	);
 
 	const editorDelete = await editor.request('DELETE', `/api/admin/news/${newsSlug}`);
 	check('el editor NO puede borrar noticias → 403', editorDelete.status === 403, `status=${editorDelete.status}`);

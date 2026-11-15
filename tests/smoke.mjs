@@ -152,6 +152,14 @@ try {
 
 	const newsItem = await get('/api/news/luna-encontro-hogar');
 	check('GET noticia por slug', newsItem.status === 200 && newsItem.body.title === 'Luna encontró hogar');
+	check(
+		'el detalle trae sus secciones',
+		Array.isArray(newsItem.body?.sections) && newsItem.body.sections.length > 0,
+		`len=${newsItem.body?.sections?.length}`
+	);
+
+	const newsSections = await get('/api/news/sections');
+	check('GET /api/news/sections devuelve lista', Array.isArray(newsSections.body));
 
 	const content = await get('/api/site/content');
 	check(

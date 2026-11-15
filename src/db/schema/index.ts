@@ -12,5 +12,6 @@ export * from './project.js';
 export * from './shop.js';
 export * from './orders.js';
 export * from './news.js';
+export * from './news-section.js';
 export * from './donations.js';
 export * from './auth.js';

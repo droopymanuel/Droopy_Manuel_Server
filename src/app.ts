@@ -103,6 +103,7 @@ export function createApp(): Express {
 				'GET  /api/shop/shipping',
 				'GET  /api/news?offset=&limit=',
 				'GET  /api/news/categories',
+				'GET  /api/news/sections',
 				'GET  /api/news/:slug',
 				'POST /api/orders',
 				'GET  /api/orders/:orderNumber',
