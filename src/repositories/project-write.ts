@@ -98,8 +98,22 @@ async function shiftUp(tx: ProjectTx, from: number): Promise<void> {
  * Mueve el hueco de `oldPosition` a `newPosition`.
  *
  * Debe correrse antes de escribir la nueva posición de la sección movida.
+ *
+ * La sección movida se saca primero a una posición temporal (`-id`, siempre
+ * libre porque las reales son >= 1): si no, al recorrer las demás chocan con
+ * la restricción única de `position` a mitad de camino.
  */
-async function moveGap(tx: ProjectTx, oldPosition: number, newPosition: number): Promise<void> {
+async function moveGap(
+	tx: ProjectTx,
+	id: number,
+	oldPosition: number,
+	newPosition: number
+): Promise<void> {
+	await tx
+		.update(projectSections)
+		.set({ position: -id, updatedAt: new Date() })
+		.where(eq(projectSections.id, id));
+
 	if (newPosition < oldPosition) {
 		// Sube: las filas [newPosition, oldPosition) suben un puesto.
 		const rows = await tx
@@ -191,7 +205,7 @@ export async function updateProjectSection(
 		if (input.position !== undefined) {
 			const next = requireInt(input.position, 'position', 1);
 			if (next !== current.position) {
-				await moveGap(tx, current.position, next);
+				await moveGap(tx, id, current.position, next);
 				values.position = next;
 			}
 		}
