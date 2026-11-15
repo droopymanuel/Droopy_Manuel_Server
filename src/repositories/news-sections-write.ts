@@ -103,13 +103,23 @@ async function shiftUp(tx: NewsSectionTx, newsSlug: string, from: number): Promi
  * Mueve el hueco de `oldPosition` a `newPosition` dentro de la noticia.
  *
  * Debe correrse antes de escribir la nueva posición de la sección movida.
+ *
+ * La sección movida se saca primero a una posición temporal (`-id`, siempre
+ * libre porque las reales son >= 1): si no, al recorrer las demás chocan con
+ * la restricción única `(news_slug, position)` a mitad de camino.
  */
 async function moveGap(
 	tx: NewsSectionTx,
 	newsSlug: string,
+	id: number,
 	oldPosition: number,
 	newPosition: number
 ): Promise<void> {
+	await tx
+		.update(newsSections)
+		.set({ position: -id, updatedAt: new Date() })
+		.where(and(eq(newsSections.newsSlug, newsSlug), eq(newsSections.id, id)));
+
 	if (newPosition < oldPosition) {
 		// Sube: las filas [newPosition, oldPosition) suben un puesto.
 		const rows = await tx
@@ -214,7 +224,7 @@ export async function updateNewsSection(
 		if (input.position !== undefined) {
 			const next = requireInt(input.position, 'position', 1);
 			if (next !== current.position) {
-				await moveGap(tx, newsSlug, current.position, next);
+				await moveGap(tx, newsSlug, id, current.position, next);
 				values.position = next;
 			}
 		}
