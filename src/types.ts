@@ -332,6 +332,36 @@ export const NEWS_CATEGORY_SLUGS = [
 
 export type NewsCategory = (typeof NEWS_CATEGORY_SLUGS)[number];
 
+/**
+ * Clases de sección del cuerpo de una noticia.
+ *
+ * Mismas clases que la página `/project`: `hero` es la portada/intro,
+ * `chapter` un bloque de historia y `closing` la cita de cierre.
+ *
+ * Fuente única: el enum de la base (`newsSectionKindEnum`), la validación de
+ * escritura (`news-sections-write.ts`) y las etiquetas del panel derivan de
+ * aquí.
+ */
+export const NEWS_SECTION_KINDS = ['hero', 'chapter', 'closing'] as const;
+
+export type NewsSectionKind = (typeof NEWS_SECTION_KINDS)[number];
+
+/**
+ * Un bloque editable del cuerpo de una noticia.
+ *
+ * `position` ordena los bloques dentro de la noticia y es único por noticia.
+ * `title` nulo = sin encabezado visible. `body` son párrafos en texto plano
+ * con `**negrita**` como único formato.
+ */
+export interface NewsSection {
+	id: number;
+	newsSlug: Slug;
+	position: number;
+	kind: NewsSectionKind;
+	title: string | null;
+	body: string[];
+}
+
 export interface NewsItem {
 	slug: Slug;
 	title: string;
@@ -343,6 +373,11 @@ export interface NewsItem {
 	photo: PhotoPath;
 	emoji: string;
 	relatedDogSlugs: Slug[];
+	/**
+	 * Bloques del cuerpo. Solo lo sirve el detalle (`GET /api/news/:slug`):
+	 * el feed no los carga para no engordar la respuesta.
+	 */
+	sections?: NewsSection[];
 	featured?: boolean;
 }
 

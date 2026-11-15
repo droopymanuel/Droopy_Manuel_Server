@@ -83,7 +83,7 @@ src/
   types.ts            Tipos de dominio (contrato con el frontend)
   db/
     index.ts          Conexión a PostgreSQL (Drizzle)
-    schema/           Esquema: 22 tablas y 12 enums
+    schema/           Esquema: 23 tablas y 13 enums
     seed.ts           Carga el contenido desde src/data/*.ts
   repositories/       Lectura y escritura contra la base
     mappers.ts        Fila de base → tipo de dominio
@@ -92,6 +92,7 @@ src/
     dogs-write.ts  shop-write.ts  news-write.ts  site-write.ts  (escritura)
     dog-news.ts  dog-news-write.ts  (comunicados por perrito)
     dog-health.ts  dog-health-write.ts  (salud, vacunas y accesorios)
+    news-sections.ts  news-sections-write.ts  (cuerpo de noticias)
   auth/
     crypto.ts         bcrypt y tokens de sesión
     users.ts          Cuentas, sesiones, auditoría
@@ -203,7 +204,8 @@ curl -X POST http://localhost:3100/api/orders \
 | GET | `/api/news` | Feed completo, más reciente primero |
 | GET | `/api/news?offset=&limit=` | Página + `hasMore` (scroll infinito) |
 | GET | `/api/news/categories` | Categorías con etiqueta visible |
-| GET | `/api/news/:slug` | Una noticia |
+| GET | `/api/news/sections` | Secciones de todas las noticias (panel) |
+| GET | `/api/news/:slug` | Una noticia con sus `sections` |
 
 ### Sitio y donaciones
 
@@ -258,6 +260,9 @@ curl -X POST http://localhost:3100/api/orders \
 | POST | `/api/admin/news` | editor | Crea una noticia |
 | PATCH | `/api/admin/news/:slug` | editor | Edita una noticia |
 | DELETE | `/api/admin/news/:slug` | **admin** | Borra una noticia |
+| POST | `/api/admin/news/:slug/sections` | editor | Agrega una sección al cuerpo |
+| PATCH | `/api/admin/news/:slug/sections/:id` | editor | Edita una sección (incluida `position`) |
+| DELETE | `/api/admin/news/:slug/sections/:id` | **admin** | Borra una sección |
 | PUT | `/api/admin/site/settings/:key` | editor | Texto, correo, estadísticas o anuncio de inicio |
 | PATCH | `/api/admin/site/contact/:key` | editor | Edita un canal (p. ej. `whatsapp`) |
 | POST/PATCH | `/api/admin/site/donation-tiers…` | editor | Niveles de donación |

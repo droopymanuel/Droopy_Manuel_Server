@@ -48,11 +48,9 @@ function buildValues(input: NewsInput, partial: boolean) {
 		values.excerpt = requireString(input.excerpt, 'excerpt', 2000);
 	}
 	if (!partial || input.body !== undefined) {
-		const body = requireStringArray(input.body, 'body');
-		if (body.length === 0) {
-			throw new ValidationError('El campo "body" debe tener al menos un párrafo.');
-		}
-		values.body = body;
+		// Las secciones son el cuerpo real: el alta puede no traer `body` y se
+		// guarda vacío. Si viene, se normaliza igual que antes.
+		values.body = input.body === undefined ? [] : requireStringArray(input.body, 'body');
 	}
 	if (!partial || input.date !== undefined) {
 		const date = requireString(input.date, 'date', 10);

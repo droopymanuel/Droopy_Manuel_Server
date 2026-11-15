@@ -159,6 +159,11 @@ try {
 
 	const article = await news.getNewsItem('luna-encontro-hogar');
 	check('getNewsItem()', article?.title === 'Luna encontró hogar');
+	check(
+		'getNewsItem() incluye secciones',
+		Array.isArray(article?.sections) && article.sections.length > 0,
+		`len=${article?.sections?.length}`
+	);
 
 	const missingArticle = await news.getNewsItem('no-existe');
 	check('getNewsItem inexistente → null', missingArticle === null);

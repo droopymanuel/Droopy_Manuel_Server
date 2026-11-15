@@ -5,6 +5,7 @@ import {
 	getNewsItem,
 	getNewsPage
 } from '../repositories/news.js';
+import { getAllNewsSections } from '../repositories/news-sections.js';
 import { NEWS_CATEGORY_SLUGS, type NewsCategory, type NewsFilter } from '../types.js';
 import { asyncHandler, badRequest, notFound, queryParam, routeParam } from './helpers.js';
 
@@ -16,6 +17,19 @@ const DEFAULT_PAGE_LIMIT = 6;
 router.get('/categories', (_req: Request, res: Response) => {
 	res.json(NEWS_CATEGORIES);
 });
+
+/**
+ * GET /api/news/sections — secciones de todas las noticias.
+ *
+ * Debe declararse antes de `/:slug`: si no, Express toma «sections» como slug.
+ * Lo usa el panel para agrupar por noticia sin pedir una por una.
+ */
+router.get(
+	'/sections',
+	asyncHandler(async (_req: Request, res: Response) => {
+		res.json(await getAllNewsSections());
+	})
+);
 
 /**
  * GET /api/news?offset=0&limit=6&q=texto&category=rescate — noticias filtradas.
