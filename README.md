@@ -220,6 +220,19 @@ curl -X POST http://localhost:3100/api/orders \
 | GET | `/api/site/donation-targets` | Perritos a los que donar |
 | GET | `/api/site/bank-accounts` | Cuentas para transferir |
 
+`POST /api/donations/checkout` crea la preferencia de Mercado Pago.
+`POST /api/donations/webhook` recibe el aviso del pago, lo vuelve a consultar
+en Mercado Pago y lo guarda en `donations` (una fila por pago, sin duplicados).
+Para que Mercado Pago avise en producción define `SERVER_PUBLIC_URL` (https) o
+`MERCADOPAGO_NOTIFICATION_URL`; si defines `MERCADOPAGO_WEBHOOK_SECRET`, además
+se valida la firma `x-signature`. En local, sin URL pública, no hay webhook.
+
+Tras pagar, el checkout vuelve siempre a `/dona-estrellas/estado`. Esa página
+busca el pago por `external_reference` (`GET /api/donations/status`) y muestra
+el estado guardado en la base. Si el webhook aún no llegó, se ve como pendiente.
+`MERCADOPAGO_BACK_URL_<ESTADO>` permite cambiar el destino por estado;
+`MERCADOPAGO_BACK_URL` manda a los tres a una sola URL.
+
 `GET /` devuelve el índice de rutas, útil para explorar a mano.
 
 ### Autenticación del panel
@@ -303,6 +316,10 @@ Copia `.env.example` a `.env` si necesitas cambiar algo:
 - `PUBLIC_ORIGINS` — orígenes permitidos por CORS, separados por coma
 - `ADMIN_TOKEN` — opcional, para escritura desde scripts
 - `NODE_ENV` — `production` activa la cookie `secure`
+- `MERCADOPAGO_ACCESS_TOKEN` / `MERCADOPAGO_CURRENCY` — cuenta y moneda de Mercado Pago
+- `SERVER_PUBLIC_URL` o `MERCADOPAGO_NOTIFICATION_URL` — URL https del webhook de donaciones
+- `MERCADOPAGO_WEBHOOK_SECRET` — opcional, exige firma válida en el webhook
+- `MERCADOPAGO_BACK_URL_<ESTADO>` — opcional, destino de retorno por estado
 
 > **Nota sobre los puertos.** En Windows es común que el 3000 y el 3001 ya
 > estén ocupados por otras herramientas. Por eso la API usa `3100`. La base de

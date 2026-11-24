@@ -217,6 +217,21 @@ export interface DonationTarget {
 	goalCents?: Cents;
 }
 
+/**
+ * Estado público de una donación.
+ *
+ * Es lo único que se expone en la página de resultado: nunca el correo ni el
+ * nombre de quien donó.
+ */
+export interface DonationStatus {
+	status: string;
+	statusDetail: string | null;
+	stars: number | null;
+	amountCents: number;
+	currency: string;
+	paidAt: string | null;
+}
+
 // ------------------------------------------------------------------ Tienda
 
 export interface ShopCategory {

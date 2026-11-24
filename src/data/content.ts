@@ -77,32 +77,32 @@ export const donationTiers: DonationTier[] = [
 	{
 		stars: 1,
 		name: 'Estrella Cachorra',
-		priceCents: 5000,
-		currency: 'MXN',
+		priceCents: 100,
+		currency: 'COP',
 		blurb: 'Un día de croquetas para un rescatado.',
 		perks: ['Mención en el muro de estrellas', 'Foto de agradecimiento']
 	},
 	{
 		stars: 3,
 		name: 'Estrella Guardián',
-		priceCents: 15000,
-		currency: 'MXN',
+		priceCents: 300000,
+		currency: 'COP',
 		blurb: 'Vacunas y desparasitación de un rescate nuevo.',
 		perks: ['Todo lo anterior', 'Carta del perrito que ayudaste', 'Sticker de la manada']
 	},
 	{
 		stars: 5,
 		name: 'Estrella Arcoíris',
-		priceCents: 30000,
-		currency: 'MXN',
+		priceCents: 500000,
+		currency: 'COP',
 		blurb: 'Esterilización completa + seguimiento post-operatorio.',
 		perks: ['Todo lo anterior', 'Videollamada con la manada', 'Tu nombre en una casita del refugio']
 	},
 	{
 		stars: 12,
 		name: 'Constelación Droopy',
-		priceCents: 60000,
-		currency: 'MXN',
+		priceCents: 1000000,
+		currency: 'COP',
 		blurb: 'Apadrina a un perrito por un mes: comida, vet y amor.',
 		perks: ['Todo lo anterior', 'Padrino oficial con certificado', 'Visitas programadas al refugio']
 	}
