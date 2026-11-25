@@ -1,5 +1,5 @@
 import express, { type Express, type NextFunction, type Request, type Response } from 'express';
-import cors from 'cors';
+import cors, { type CorsOptions } from 'cors';
 import { sql } from 'drizzle-orm';
 
 import { db } from './db/index.js';
@@ -11,6 +11,8 @@ import ordersRouter from './routes/orders.js';
 import siteRouter from './routes/site.js';
 import authRouter from './routes/auth.js';
 import adminRouter from './routes/admin/index.js';
+import donationsRouter from './routes/donations.js';
+import { donationConfigStatus } from './payments/mercadopago.js';
 
 /**
  * Orígenes permitidos por CORS.
@@ -22,7 +24,8 @@ const DEV_ORIGINS = [
 	'http://localhost:5173',
 	'http://127.0.0.1:5173',
 	'http://localhost:4173',
-	'http://127.0.0.1:4173'
+	'http://127.0.0.1:4173',
+	'736c-45-229-73-106.ngrok-free.app'
 ];
 
 function corsOrigins(): string[] {
@@ -32,12 +35,31 @@ function corsOrigins(): string[] {
 	return fromEnv && fromEnv.length > 0 ? fromEnv : DEV_ORIGINS;
 }
 
+/** En desarrollo, cualquier puerto de localhost vale (Vite salta 5173 → 5174). */
+function isLocalDevOrigin(origin: string): boolean {
+	return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+}
+
+const corsOrigin: CorsOptions['origin'] = (origin, callback) => {
+	if (!origin || corsOrigins().includes(origin)) {
+		callback(null, true);
+		return;
+	}
+
+	if (process.env.NODE_ENV !== 'production' && isLocalDevOrigin(origin)) {
+		callback(null, true);
+		return;
+	}
+
+	callback(null, false);
+};
+
 export function createApp(): Express {
 	const app: Express = express();
 
 	app.use(
 		cors({
-			origin: corsOrigins(),
+			origin: corsOrigin,
 			methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
 			allowedHeaders: ['Content-Type', 'x-admin-token'],
 			// El panel usa cookie de sesión, así que el navegador debe enviarla.
@@ -59,10 +81,17 @@ export function createApp(): Express {
 		}
 
 		const healthy = database === 'ok';
+		const payments = donationConfigStatus();
+		const paymentsHealthy =
+			payments.accessToken && (!payments.production || payments.webhookSecret);
 		res.status(healthy ? 200 : 503).json({
 			status: healthy ? 'ok' : 'degraded',
 			database,
-			uptime: Math.round(process.uptime())
+			uptime: Math.round(process.uptime()),
+			payments: {
+				...payments,
+				healthy: paymentsHealthy
+			}
 		});
 	});
 
@@ -74,6 +103,7 @@ export function createApp(): Express {
 	app.use('/api/news', newsRouter);
 	app.use('/api/orders', ordersRouter);
 	app.use('/api/site', siteRouter);
+	app.use('/api/donations', donationsRouter);
 
 	/** Índice de la API, para descubrir las rutas a mano. */
 	app.get('/', (_req: Request, res: Response) => {
@@ -107,6 +137,9 @@ export function createApp(): Express {
 				'GET  /api/news/:slug',
 				'POST /api/orders',
 				'GET  /api/orders/:orderNumber',
+				'POST /api/donations/checkout',
+				'GET  /api/donations/status?external_reference=',
+				'POST /api/donations/webhook',
 				'GET  /api/site/content',
 				'GET  /api/site/announcement',
 				'GET  /api/site/contact',
