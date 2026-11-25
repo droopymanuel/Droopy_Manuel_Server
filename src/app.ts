@@ -12,6 +12,7 @@ import siteRouter from './routes/site.js';
 import authRouter from './routes/auth.js';
 import adminRouter from './routes/admin/index.js';
 import donationsRouter from './routes/donations.js';
+import { donationConfigStatus } from './payments/mercadopago.js';
 
 /**
  * Orígenes permitidos por CORS.
@@ -80,10 +81,17 @@ export function createApp(): Express {
 		}
 
 		const healthy = database === 'ok';
+		const payments = donationConfigStatus();
+		const paymentsHealthy =
+			payments.accessToken && (!payments.production || payments.webhookSecret);
 		res.status(healthy ? 200 : 503).json({
 			status: healthy ? 'ok' : 'degraded',
 			database,
-			uptime: Math.round(process.uptime())
+			uptime: Math.round(process.uptime()),
+			payments: {
+				...payments,
+				healthy: paymentsHealthy
+			}
 		});
 	});
 

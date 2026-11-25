@@ -52,3 +52,20 @@ export function donationNotificationUrl(): string | undefined {
 export function webhookSecret(): string | undefined {
 	return process.env.MERCADOPAGO_WEBHOOK_SECRET?.trim() || undefined;
 }
+
+/** Diagnóstico de configuración de Mercado Pago (sin exponer secretos). */
+export function donationConfigStatus(): {
+	accessToken: boolean;
+	currency: string;
+	notificationUrl: boolean;
+	webhookSecret: boolean;
+	production: boolean;
+} {
+	return {
+		accessToken: Boolean(process.env.MERCADOPAGO_ACCESS_TOKEN?.trim()),
+		currency: donationCurrency(),
+		notificationUrl: Boolean(donationNotificationUrl()),
+		webhookSecret: Boolean(webhookSecret()),
+		production: process.env.NODE_ENV === 'production'
+	};
+}
